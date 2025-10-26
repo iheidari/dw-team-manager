@@ -31,6 +31,24 @@ export const columnDefs: ColDef<RowData>[] = [
       values: ["Ind1", "Ind2", "Ind3", "Ind4", "Ind5", "Ind6"],
     },
   },
-  { field: "kills", headerName: "Kills", flex: 1, filter: true },
-  { field: "cp", headerName: "CP", flex: 1, filter: true },
+  {
+    field: "kills",
+    headerName: "Kills",
+    flex: 1,
+    filter: true,
+    type: "number",
+    comparator: (valueA: number, valueB: number) => {
+      return valueA - valueB;
+    },
+  },
+  {
+    field: "cp",
+    headerName: "CP",
+    flex: 1,
+    filter: true,
+    type: "number",
+    comparator: (valueA: number, valueB: number) => {
+      return valueA - valueB;
+    },
+  },
 ];
