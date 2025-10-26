@@ -4,14 +4,15 @@ import { ObjectId } from "mongodb";
 
 export async function GET(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const client = await clientPromise;
     const db = client.db("dw-team-manager");
     const member = await db
       .collection("members")
-      .findOne({ _id: new ObjectId(params.id as string) });
+      .findOne({ _id: new ObjectId(id as string) });
 
     if (!member) {
       return NextResponse.json(
