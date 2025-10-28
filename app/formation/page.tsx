@@ -15,6 +15,7 @@ import Header from "../components/Header";
 import { Member } from "../services/types";
 import Loading from "./components/Loading";
 import Card from "./components/Card";
+import BackButton from "../member/[id]/components/BackButton";
 
 export default function Formation() {
   const [members, setMembers] = useState<Member[]>([]);
@@ -201,19 +202,17 @@ export default function Formation() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
+    <>
+      <div className="flex w-full max-w-5xl flex-col items-center pt-8 px-8 bg-white dark:bg-black sm:items-start">
+        <BackButton />
+      </div>
       <DndContext
         sensors={sensors}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <main className="flex min-h-screen w-full max-w-7xl flex-col items-center py-16 px-8 bg-white dark:bg-black sm:items-start">
-          <Header />
-          <div className="w-full mt-8">
-            <h2 className="text-2xl font-semibold mb-6 text-zinc-900 dark:text-white">
-              Formation
-            </h2>
-
+        <main className="flex  w-full  flex-col items-center bg-white dark:bg-black sm:items-start">
+          <div className="w-full mt-4">
             <div className="overflow-x-auto mb-4">
               <div
                 className="grid gap-4"
@@ -261,6 +260,6 @@ export default function Formation() {
           ) : null}
         </DragOverlay>
       </DndContext>
-    </div>
+    </>
   );
 }

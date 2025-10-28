@@ -84,7 +84,7 @@ const Card = (props: Props) => {
           isOver
             ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
             : "border-zinc-300 dark:border-zinc-700"
-        } rounded-lg flex items-center justify-center p-4 ${
+        } rounded-lg flex items-center justify-center p-2 ${
           isDragging ? "opacity-50" : ""
         }`}
       >
@@ -109,7 +109,7 @@ const Card = (props: Props) => {
           isOver
             ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
             : "border-zinc-300 dark:border-zinc-700"
-        } rounded-lg flex items-center justify-center p-4 cursor-grab active:cursor-grabbing ${
+        } rounded-lg flex items-center justify-center p-2 cursor-grab active:cursor-grabbing ${
           isDragging ? "opacity-50" : ""
         }`}
       >

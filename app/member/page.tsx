@@ -100,7 +100,7 @@ export default function NewMemberPage() {
                   />
 
                   <SelectField
-                    label="Level"
+                    label="Watch Tower"
                     name="level"
                     value={formData.level}
                     onChange={(value) => handleChange("level", value)}

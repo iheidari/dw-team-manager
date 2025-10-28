@@ -35,7 +35,7 @@ export const columnDefs: ColDef<RowData>[] = [
   },
   {
     field: "level",
-    headerName: "Level",
+    headerName: "Watch Tower",
     flex: 1,
     filter: true,
     cellDataType: "text",
@@ -48,7 +48,7 @@ export const columnDefs: ColDef<RowData>[] = [
     comparator: (valueA: number, valueB: number) => {
       return valueA - valueB;
     },
-    // cellDataType: "number",
+    // cellDataType: "number", // This is not working, shows Invalid number
   },
   {
     field: "cp",
@@ -58,6 +58,6 @@ export const columnDefs: ColDef<RowData>[] = [
     comparator: (valueA: number, valueB: number) => {
       return valueA - valueB;
     },
-    // cellDataType: "number",
+    // cellDataType: "number", // This is not working, shows Invalid number
   },
 ];

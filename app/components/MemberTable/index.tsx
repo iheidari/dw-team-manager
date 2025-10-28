@@ -19,6 +19,7 @@ const MemberTable = () => {
   const router = useRouter();
   const [rowData, setRowData] = useState<RowData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchText, setSearchText] = useState("");
   const gridRef = useRef<AgGridReact>(null);
   const sortModelRef = useRef<
     Array<{
@@ -117,6 +118,29 @@ const MemberTable = () => {
     }
   };
 
+  // Throttled search effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (gridRef.current?.api) {
+        if (searchText) {
+          gridRef.current.api.setFilterModel({
+            name: {
+              type: "contains",
+              filter: searchText,
+            },
+          });
+        } else {
+          // Clear the name filter if search is empty
+          const currentFilterModel = gridRef.current.api.getFilterModel() || {};
+          delete currentFilterModel.name;
+          gridRef.current.api.setFilterModel(currentFilterModel);
+        }
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchText]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[500px]">
@@ -126,28 +150,40 @@ const MemberTable = () => {
   }
 
   return (
-    <div className="ag-theme-quartz w-full" style={{ height: "500px" }}>
-      <AgGridReact<RowData>
-        ref={gridRef}
-        theme="legacy"
-        columnDefs={columnDefs}
-        rowData={rowData}
-        defaultColDef={{
-          flex: 1,
-          sortable: true,
-          filter: true,
-          resizable: true,
-        }}
-        enableCellTextSelection={true}
-        suppressCellFocus={false}
-        onRowClicked={onRowClicked}
-        onGridReady={onGridReady}
-        onColumnMoved={saveState}
-        onColumnResized={saveState}
-        onSortChanged={onSortChanged}
-        onFilterChanged={onFilterChanged}
-        className="cursor-pointer"
-      />
+    <div className="w-full">
+      <div className="mb-3 flex justify-end">
+        <input
+          type="text"
+          placeholder="Search by name..."
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          className="px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white placeholder-zinc-500 dark:placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          style={{ minWidth: "250px" }}
+        />
+      </div>
+      <div className="ag-theme-quartz w-full" style={{ height: "500px" }}>
+        <AgGridReact<RowData>
+          ref={gridRef}
+          theme="legacy"
+          columnDefs={columnDefs}
+          rowData={rowData}
+          defaultColDef={{
+            flex: 1,
+            sortable: true,
+            filter: true,
+            resizable: true,
+          }}
+          enableCellTextSelection={true}
+          suppressCellFocus={false}
+          onRowClicked={onRowClicked}
+          onGridReady={onGridReady}
+          onColumnMoved={saveState}
+          onColumnResized={saveState}
+          onSortChanged={onSortChanged}
+          onFilterChanged={onFilterChanged}
+          className="cursor-pointer"
+        />
+      </div>
     </div>
   );
 };
