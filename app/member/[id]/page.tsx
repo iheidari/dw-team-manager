@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import Header from "@/app/components/Header";
 import BackButton from "./components/BackButton";
 import Field from "./components/Field";
+import SelectField from "./components/SelectField";
 import NotFound from "./components/NotFound";
+import { LEVEL_OPTIONS, RANK_OPTIONS } from "../util";
 
 interface Member {
   _id: string;
@@ -150,18 +152,20 @@ export default function MemberDetailPage({
                     onChange={(value) => handleChange("name", value)}
                   />
 
-                  <Field
+                  <SelectField
                     label="Rank"
                     name="rank"
                     value={formData.rank}
                     onChange={(value) => handleChange("rank", value)}
+                    options={RANK_OPTIONS}
                   />
 
-                  <Field
+                  <SelectField
                     label="Level"
                     name="level"
                     value={formData.level}
                     onChange={(value) => handleChange("level", value)}
+                    options={LEVEL_OPTIONS}
                   />
                 </div>
 

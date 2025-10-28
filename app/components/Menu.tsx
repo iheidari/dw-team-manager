@@ -10,10 +10,10 @@ const menuItems = [
     href: "/formation",
   },
 
-  {
-    label: "Upload",
-    href: "/upload",
-  },
+  // {
+  //   label: "Upload",
+  //   href: "/upload",
+  // },
 ];
 
 const Menu = () => {

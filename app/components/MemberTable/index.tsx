@@ -113,7 +113,7 @@ const MemberTable = () => {
   const onRowClicked = (event: RowClickedEvent<RowData>) => {
     if (event.data) {
       const memberId = event.data._id;
-      router.push(`/members/${memberId}`);
+      router.push(`/member/${memberId}`);
     }
   };
 
@@ -140,7 +140,6 @@ const MemberTable = () => {
         }}
         enableCellTextSelection={true}
         suppressCellFocus={false}
-        rowSelection="multiple"
         onRowClicked={onRowClicked}
         onGridReady={onGridReady}
         onColumnMoved={saveState}

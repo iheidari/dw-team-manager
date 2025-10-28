@@ -3,8 +3,20 @@ import { ColDef } from "ag-grid-community";
 export interface RowData {
   _id: string;
   name: string;
-  rank: "R1" | "R2" | "R3" | "R4" | "R5";
-  level: "Ind1" | "Ind2" | "Ind3" | "Ind4" | "Ind5" | "Ind6";
+  rank: string; // "R1" | "R2" | "R3" | "R4" | "R5";
+  level: string;
+  // | "Ind1"
+  // | "Ind2"
+  // | "Ind3"
+  // | "Ind4"
+  // | "Ind5"
+  // | "Ind6"
+  // | "30"
+  // | "29"
+  // | "28"
+  // | "27"
+  // | "26"
+  // | "25";
   kills: number;
   cp: number;
   location?: {
@@ -20,39 +32,31 @@ export const columnDefs: ColDef<RowData>[] = [
     headerName: "Rank",
     flex: 1,
     filter: true,
-    cellEditor: "agSelectCellEditor",
-    cellEditorParams: {
-      values: ["R1", "R2", "R3", "R4", "R5"],
-    },
   },
   {
     field: "level",
     headerName: "Level",
     flex: 1,
     filter: true,
-    cellEditor: "agSelectCellEditor",
-    cellEditorParams: {
-      values: ["Ind1", "Ind2", "Ind3", "Ind4", "Ind5", "Ind6"],
-    },
   },
   {
     field: "kills",
     headerName: "Kills",
     flex: 1,
     filter: true,
-    type: "number",
     comparator: (valueA: number, valueB: number) => {
       return valueA - valueB;
     },
+    // cellDataType: "number",
   },
   {
     field: "cp",
     headerName: "CP",
     flex: 1,
     filter: true,
-    type: "number",
     comparator: (valueA: number, valueB: number) => {
       return valueA - valueB;
     },
+    // cellDataType: "number",
   },
 ];
