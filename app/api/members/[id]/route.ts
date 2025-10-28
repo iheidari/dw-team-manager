@@ -41,18 +41,34 @@ export async function PATCH(
     const db = client.db("dw-team-manager");
     const body = await request.json();
 
-    const { location } = body;
+    const { location, name, rank, level, kills, cp } = body;
 
-    let updateOperator: Record<string, unknown> = {};
+    let updateOperator: Record<string, unknown> = { $set: {} };
 
+    // Handle location update or removal
     if (location !== undefined) {
       if (location === null) {
-        // Use $unset to remove the location field
         updateOperator = { $unset: { location: "" } };
       } else {
-        // Use $set to update the location field
-        updateOperator = { $set: { location } };
+        (updateOperator.$set as Record<string, unknown>).location = location;
       }
+    }
+
+    // Handle regular field updates
+    if (name !== undefined) {
+      (updateOperator.$set as Record<string, unknown>).name = name;
+    }
+    if (rank !== undefined) {
+      (updateOperator.$set as Record<string, unknown>).rank = rank;
+    }
+    if (level !== undefined) {
+      (updateOperator.$set as Record<string, unknown>).level = level;
+    }
+    if (kills !== undefined) {
+      (updateOperator.$set as Record<string, unknown>).kills = Number(kills);
+    }
+    if (cp !== undefined) {
+      (updateOperator.$set as Record<string, unknown>).cp = Number(cp);
     }
 
     const result = await db

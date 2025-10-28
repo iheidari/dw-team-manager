@@ -1,29 +1,125 @@
-import { Metadata } from "next";
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Header from "@/app/components/Header";
-import { getMember } from "@/app/services/members";
 import BackButton from "./components/BackButton";
 import Field from "./components/Field";
 import NotFound from "./components/NotFound";
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}): Promise<Metadata> {
-  const { id } = await params;
-  const member = await getMember(id);
-  return {
-    title: member ? `${member.name} - Team Member` : "Member Not Found",
+interface Member {
+  _id: string;
+  name: string;
+  rank: string;
+  level: string;
+  kills: number;
+  cp: number;
+  location?: {
+    row: number;
+    col: number;
   };
 }
 
-export default async function MemberDetailPage({
+export default function MemberDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
-  const member = await getMember(id);
+  const [member, setMember] = useState<Member | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    rank: "",
+    level: "",
+    kills: "",
+    cp: "",
+  });
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchMember = async () => {
+      try {
+        const resolvedParams = await params;
+        const response = await fetch(`/api/members/${resolvedParams.id}`);
+        if (!response.ok) {
+          setMember(null);
+          return;
+        }
+        const result = await response.json();
+        const memberData = result.data;
+        setMember(memberData);
+        setFormData({
+          name: memberData.name,
+          rank: memberData.rank,
+          level: memberData.level,
+          kills: memberData.kills,
+          cp: memberData.cp,
+        });
+      } catch (error) {
+        console.error("Error fetching member:", error);
+        setMember(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMember();
+  }, [params]);
+
+  const handleChange = (field: string, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!member) return;
+
+    setSubmitting(true);
+    try {
+      const response = await fetch(`/api/members/${member._id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          rank: formData.rank,
+          level: formData.level,
+          kills: Number(formData.kills),
+          cp: Number(formData.cp),
+        }),
+      });
+
+      if (response.ok) {
+        // Refresh the data
+        router.back();
+      } else {
+        alert("Failed to update member");
+      }
+    } catch (error) {
+      console.error("Error updating member:", error);
+      alert("Error updating member");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
+        <div className="flex min-h-screen w-full max-w-5xl flex-col items-center py-16 px-8 bg-white dark:bg-black sm:items-start">
+          <Header />
+          <div className="w-full flex items-center justify-center">
+            <p className="text-zinc-600 dark:text-zinc-400">Loading...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!member) {
     return <NotFound />;
@@ -37,29 +133,66 @@ export default async function MemberDetailPage({
         <div className="w-full">
           <BackButton />
 
-          <div className="bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800 rounded-lg shadow-lg p-8">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-3xl font-bold text-zinc-900 dark:text-white">
-                {member.name}
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <Field label="Name" value={member.name} />
-
-                <Field label="Rank" value={member.rank} />
-
-                <Field label="Level" value={member.level} />
+          <form onSubmit={handleSubmit}>
+            <div className="bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800 rounded-lg shadow-lg p-8">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-3xl font-bold text-zinc-900 dark:text-white">
+                  Edit Member
+                </h2>
               </div>
 
-              <div className="space-y-4">
-                <Field label="Kills" value={member.kills} />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <Field
+                    label="Name"
+                    name="name"
+                    value={formData.name}
+                    onChange={(value) => handleChange("name", value)}
+                  />
 
-                <Field label="CP" value={member.cp} />
+                  <Field
+                    label="Rank"
+                    name="rank"
+                    value={formData.rank}
+                    onChange={(value) => handleChange("rank", value)}
+                  />
+
+                  <Field
+                    label="Level"
+                    name="level"
+                    value={formData.level}
+                    onChange={(value) => handleChange("level", value)}
+                  />
+                </div>
+
+                <div className="space-y-4">
+                  <Field
+                    label="Kills"
+                    name="kills"
+                    value={formData.kills}
+                    onChange={(value) => handleChange("kills", value)}
+                  />
+
+                  <Field
+                    label="CP"
+                    name="cp"
+                    value={formData.cp}
+                    onChange={(value) => handleChange("cp", value)}
+                  />
+                </div>
+              </div>
+
+              <div className="mt-6 flex justify-end">
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {submitting ? "Saving..." : "Save Changes"}
+                </button>
               </div>
             </div>
-          </div>
+          </form>
         </div>
       </div>
     </div>
