@@ -91,3 +91,32 @@ export async function PATCH(
     );
   }
 }
+
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  try {
+    const client = await clientPromise;
+    const db = client.db("dw-team-manager");
+    const result = await db
+      .collection("members")
+      .deleteOne({ _id: new ObjectId(id as string) });
+
+    if (result.deletedCount === 0) {
+      return NextResponse.json(
+        { success: false, error: "Member not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ success: true, data: result });
+  } catch (error) {
+    console.error("Error deleting member:", error);
+    return NextResponse.json(
+      { success: false, error: "Failed to delete member" },
+      { status: 500 }
+    );
+  }
+}

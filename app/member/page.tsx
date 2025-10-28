@@ -54,8 +54,7 @@ export default function NewMemberPage() {
       const result = await response.json();
 
       if (result.success) {
-        // Redirect to the new member detail page
-        router.push(`/member/${result.data._id}`);
+        router.push(`/`);
       } else {
         alert(result.error || "Failed to create member");
       }

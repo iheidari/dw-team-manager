@@ -38,6 +38,7 @@ export const columnDefs: ColDef<RowData>[] = [
     headerName: "Level",
     flex: 1,
     filter: true,
+    cellDataType: "text",
   },
   {
     field: "kills",

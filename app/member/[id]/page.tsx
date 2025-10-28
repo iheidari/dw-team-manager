@@ -30,6 +30,8 @@ export default function MemberDetailPage({
   const [member, setMember] = useState<Member | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     rank: "",
@@ -98,7 +100,7 @@ export default function MemberDetailPage({
 
       if (response.ok) {
         // Refresh the data
-        router.back();
+        router.push("/");
       } else {
         alert("Failed to update member");
       }
@@ -108,6 +110,38 @@ export default function MemberDetailPage({
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleDeleteClick = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!member) return;
+
+    setDeleting(true);
+    try {
+      const response = await fetch(`/api/members/${member._id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        // Redirect to home
+        router.replace("/");
+      } else {
+        alert("Failed to delete member");
+      }
+    } catch (error) {
+      console.error("Error deleting member:", error);
+      alert("Error deleting member");
+    } finally {
+      setDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteConfirm(false);
   };
 
   if (loading) {
@@ -186,10 +220,19 @@ export default function MemberDetailPage({
                 </div>
               </div>
 
-              <div className="mt-6 flex justify-end">
+              <div className="mt-6 flex justify-between">
+                <button
+                  type="button"
+                  onClick={handleDeleteClick}
+                  disabled={submitting || deleting}
+                  className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Delete
+                </button>
+
                 <button
                   type="submit"
-                  disabled={submitting}
+                  disabled={submitting || deleting}
                   className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {submitting ? "Saving..." : "Save Changes"}
@@ -198,6 +241,38 @@ export default function MemberDetailPage({
             </div>
           </form>
         </div>
+
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
+              <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-4">
+                Confirm Delete
+              </h3>
+              <p className="text-zinc-600 dark:text-zinc-400 mb-6">
+                Are you sure you want to delete this member? This action cannot
+                be undone.
+              </p>
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={handleCancelDelete}
+                  disabled={deleting}
+                  className="px-4 py-2 bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-white rounded-md hover:bg-zinc-300 dark:hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmDelete}
+                  disabled={deleting}
+                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {deleting ? "Deleting..." : "Delete"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
