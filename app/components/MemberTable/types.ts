@@ -7,6 +7,10 @@ export interface RowData {
   level: "Ind1" | "Ind2" | "Ind3" | "Ind4" | "Ind5" | "Ind6";
   kills: number;
   cp: number;
+  location?: {
+    row: number;
+    col: number;
+  };
 }
 
 export const columnDefs: ColDef<RowData>[] = [
