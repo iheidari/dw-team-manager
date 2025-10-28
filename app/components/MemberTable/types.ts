@@ -1,22 +1,22 @@
-import { ColDef } from "ag-grid-community";
+import { ColDef, ValueFormatterParams } from "ag-grid-community";
 
 export interface RowData {
   _id: string;
   name: string;
-  rank: string; // "R1" | "R2" | "R3" | "R4" | "R5";
-  level: string;
-  // | "Ind1"
-  // | "Ind2"
-  // | "Ind3"
-  // | "Ind4"
-  // | "Ind5"
-  // | "Ind6"
-  // | "30"
-  // | "29"
-  // | "28"
-  // | "27"
-  // | "26"
-  // | "25";
+  rank: "R1" | "R2" | "R3" | "R4" | "R5";
+  level:
+    | "Ind1"
+    | "Ind2"
+    | "Ind3"
+    | "Ind4"
+    | "Ind5"
+    | "Ind6"
+    | "30"
+    | "29"
+    | "28"
+    | "27"
+    | "26"
+    | "25";
   kills: number;
   cp: number;
   location?: {
@@ -24,6 +24,14 @@ export interface RowData {
     col: number;
   };
 }
+
+// Format number with comma separators
+const numberFormatter = (params: ValueFormatterParams) => {
+  if (params.value == null) {
+    return "";
+  }
+  return params.value.toLocaleString("en-US");
+};
 
 export const columnDefs: ColDef<RowData>[] = [
   { field: "name", headerName: "Name", flex: 1, filter: true },
@@ -45,19 +53,15 @@ export const columnDefs: ColDef<RowData>[] = [
     headerName: "Kills",
     flex: 1,
     filter: true,
-    comparator: (valueA: number, valueB: number) => {
-      return valueA - valueB;
-    },
-    // cellDataType: "number", // This is not working, shows Invalid number
+    cellDataType: "number",
+    valueFormatter: numberFormatter,
   },
   {
     field: "cp",
     headerName: "CP",
     flex: 1,
     filter: true,
-    comparator: (valueA: number, valueB: number) => {
-      return valueA - valueB;
-    },
-    // cellDataType: "number", // This is not working, shows Invalid number
+    cellDataType: "number",
+    valueFormatter: numberFormatter,
   },
 ];

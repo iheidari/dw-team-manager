@@ -10,6 +10,7 @@ import {
 import { columnDefs, RowData } from "./types";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -151,15 +152,25 @@ const MemberTable = () => {
 
   return (
     <div className="w-full">
-      <div className="mb-3 flex justify-end">
-        <input
-          type="text"
-          placeholder="Search by name..."
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-          className="px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white placeholder-zinc-500 dark:placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          style={{ minWidth: "250px" }}
-        />
+      <div className="flex justify-between mb-4">
+        <div>
+          <input
+            type="text"
+            placeholder="Search by name..."
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            className="px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white placeholder-zinc-500 dark:placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            style={{ minWidth: "250px" }}
+          />
+        </div>
+        <div>
+          <Link
+            href="/member"
+            className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+          >
+            Add New Member
+          </Link>
+        </div>
       </div>
       <div className="ag-theme-quartz w-full" style={{ height: "500px" }}>
         <AgGridReact<RowData>
