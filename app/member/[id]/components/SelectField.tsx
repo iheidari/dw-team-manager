@@ -1,9 +1,9 @@
 interface SelectFieldProps {
-  label: string;
+  label?: string;
   name: string;
   value: string;
   onChange: (value: string) => void;
-  options: string[];
+  options: { label: string; value: string }[];
 }
 
 const SelectField = ({
@@ -15,12 +15,14 @@ const SelectField = ({
 }: SelectFieldProps) => {
   return (
     <div>
-      <label
-        htmlFor={name}
-        className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1"
-      >
-        {label}
-      </label>
+      {label && (
+        <label
+          htmlFor={name}
+          className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1"
+        >
+          {label}
+        </label>
+      )}
       <select
         id={name}
         name={name}
@@ -29,8 +31,8 @@ const SelectField = ({
         className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-md shadow-sm text-lg font-semibold text-zinc-900 dark:text-white bg-white dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
       >
         {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
+          <option key={option.value} value={option.value}>
+            {option.label}
           </option>
         ))}
       </select>

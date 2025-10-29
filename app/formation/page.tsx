@@ -11,17 +11,19 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import type { DragStartEvent } from "@dnd-kit/core";
-import Header from "../components/Header";
 import { Member } from "../services/types";
 import Loading from "./components/Loading";
 import Card from "./components/Card";
 import BackButton from "../member/[id]/components/BackButton";
+import HeatmapSelector from "./components/HeatmapSelector";
+import { getHeatmapClass, HeatMap } from "./service";
 
 export default function Formation() {
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [gridConfig, setGridConfig] = useState({ rows: 1, cols: 1 });
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [heatmap, setHeatmap] = useState<HeatMap>("");
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -197,14 +199,19 @@ export default function Formation() {
     }
   };
 
+  const handleHeatmapChange = (value: HeatMap) => {
+    setHeatmap(value);
+  };
+
   if (loading) {
     return <Loading />;
   }
 
   return (
     <>
-      <div className="flex w-full max-w-5xl flex-col items-center pt-8 px-8 bg-white dark:bg-black sm:items-start">
+      <div className="flex w-full  justify-between items-center pt-8 px-8 bg-white dark:bg-black sm:items-start">
         <BackButton />
+        <HeatmapSelector value={heatmap} onChange={handleHeatmapChange} />
       </div>
       <DndContext
         sensors={sensors}
@@ -228,7 +235,13 @@ export default function Formation() {
                   const member = getMemberAtPosition(row, col);
 
                   return (
-                    <Card key={index} member={member} row={row} col={col} />
+                    <Card
+                      key={index}
+                      member={member}
+                      row={row}
+                      col={col}
+                      className={getHeatmapClass(heatmap, member, members)}
+                    />
                   );
                 })}
               </div>
@@ -241,7 +254,11 @@ export default function Formation() {
                   {members
                     .filter((m) => !m.location)
                     .map((member) => (
-                      <Card key={member._id} member={member} />
+                      <Card
+                        key={member._id}
+                        member={member}
+                        className={getHeatmapClass(heatmap, member, members)}
+                      />
                     ))}
                 </div>
               </div>

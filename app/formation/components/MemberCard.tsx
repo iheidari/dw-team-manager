@@ -20,10 +20,10 @@ const formatNumber = (num: number): string => {
 const MemberCard = (props: Props) => {
   return (
     <div className="text-center pointer-events-none">
-      <div className="font-medium text-zinc-900 dark:text-white text-sm sm:text-base">
+      <div className="font-medium text-zinc-900 dark:text-white text-sm sm:text-base bg-gray-700/50 p-1 rounded-md">
         {props.name}
       </div>
-      <div className="text-xs text-zinc-600 dark:text-zinc-400 mt-2">
+      <div className="text-xs text-zinc-900 dark:text-white mt-2 bg-gray-400/50 p-1 rounded-md">
         ☠️{formatNumber(props.kills)} • ⚡{formatNumber(props.cp)}
       </div>
     </div>

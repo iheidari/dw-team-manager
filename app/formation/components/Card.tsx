@@ -9,10 +9,11 @@ type Props = {
   row?: number;
   col?: number;
   isUnpositionedArea?: boolean;
+  className?: string;
 };
 
 const Card = (props: Props) => {
-  const { member, row, col, isUnpositionedArea } = props;
+  const { member, row, col, isUnpositionedArea, className } = props;
   const draggableId = member
     ? `${member._id}-${
         row !== undefined && col !== undefined
@@ -105,7 +106,7 @@ const Card = (props: Props) => {
         style={style}
         {...attributes}
         {...listeners}
-        className={`aspect-square bg-zinc-100 dark:bg-zinc-900 border-2 ${
+        className={`aspect-square border-2 ${className} ${
           isOver
             ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
             : "border-zinc-300 dark:border-zinc-700"
@@ -129,7 +130,7 @@ const Card = (props: Props) => {
       style={style}
       {...attributes}
       {...listeners}
-      className={`aspect-square bg-zinc-100 dark:bg-zinc-900 border-2 ${
+      className={`aspect-square border-2 ${className} ${
         isOver
           ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
           : "border-zinc-300 dark:border-zinc-700"
