@@ -23,6 +23,7 @@ export interface RowData {
     row: number;
     col: number;
   };
+  supervisedByName?: string | null;
 }
 
 // Format number with comma separators
@@ -63,5 +64,14 @@ export const columnDefs: ColDef<RowData>[] = [
     filter: true,
     cellDataType: "number",
     valueFormatter: numberFormatter,
+  },
+  {
+    field: "supervisedByName",
+    headerName: "Supervisor",
+    flex: 1,
+    filter: true,
+    valueFormatter: (params: ValueFormatterParams) => {
+      return params.value || "-";
+    },
   },
 ];

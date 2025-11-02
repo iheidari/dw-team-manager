@@ -13,7 +13,7 @@ const HEAT_MAP = {
   3: "bg-blue-300",
   2: "bg-blue-400",
   1: "bg-blue-500",
-  0: "bg-blue-60",
+  0: "bg-blue-600",
 };
 
 const WT_HEAT_MAP = {
