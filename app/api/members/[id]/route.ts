@@ -21,7 +21,23 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({ success: true, data: member });
+    // Populate supervisor name if supervisedBy exists
+    let supervisedByName = null;
+    if (member.supervisedBy) {
+      const supervisorId =
+        member.supervisedBy instanceof ObjectId
+          ? member.supervisedBy
+          : new ObjectId(member.supervisedBy as string);
+      const supervisor = await db
+        .collection("members")
+        .findOne({ _id: supervisorId });
+      supervisedByName = supervisor?.name || null;
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: { ...member, supervisedByName },
+    });
   } catch (error) {
     console.error("Error fetching member:", error);
     return NextResponse.json(

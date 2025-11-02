@@ -6,8 +6,10 @@ import Header from "@/app/ui/Header";
 import BackButton from "@/app/ui/BackButton";
 import Field from "./components/Field";
 import SelectField from "./components/SelectField";
+import ReadOnlyField from "./components/ReadOnlyField";
 import NotFound from "./components/NotFound";
 import { LEVEL_OPTIONS, RANK_OPTIONS } from "../util";
+import Link from "next/link";
 
 interface Member {
   _id: string;
@@ -20,6 +22,7 @@ interface Member {
     row: number;
     col: number;
   };
+  supervisedByName?: string | null;
 }
 
 export default function MemberDetailPage({
@@ -216,6 +219,23 @@ export default function MemberDetailPage({
                     name="cp"
                     value={formData.cp}
                     onChange={(value) => handleChange("cp", value)}
+                  />
+
+                  <ReadOnlyField
+                    label="Supervisor"
+                    name="supervisor"
+                    value={member.supervisedByName || null}
+                    hint={
+                      <span>
+                        For changing supervisor, visit{" "}
+                        <Link
+                          href="/supervisors"
+                          className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline"
+                        >
+                          supervisor page
+                        </Link>
+                      </span>
+                    }
                   />
                 </div>
               </div>
