@@ -1,6 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+  closestCenter,
+} from "@dnd-kit/core";
 import Header from "@/app/ui/Header";
 import BackButton from "../ui/BackButton";
 import Loading from "../ui/Loading";
@@ -25,6 +32,7 @@ export default function SupervisorsPage() {
   const [supervisors, setSupervisors] = useState<Supervisor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/supervisors")
@@ -44,6 +52,67 @@ export default function SupervisorsPage() {
       });
   }, []);
 
+  const fetchSupervisors = async () => {
+    try {
+      const response = await fetch("/api/supervisors");
+      const data = await response.json();
+      if (data.success) {
+        setSupervisors(data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching supervisors:", error);
+    }
+  };
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    setActiveId(null);
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) {
+      return;
+    }
+
+    const assigneeId = active.id as string;
+    const targetSupervisorId = over.id as string;
+
+    // Find the current supervisor
+    const currentSupervisor = supervisors.find((s) =>
+      s.assignees.some((a) => a._id === assigneeId)
+    );
+
+    // Don't do anything if dropping on the same supervisor
+    if (currentSupervisor?._id === targetSupervisorId) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/members/${assigneeId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          supervisedBy: targetSupervisorId,
+        }),
+      });
+
+      if (response.ok) {
+        // Refresh the supervisors list
+        await fetchSupervisors();
+      } else {
+        console.error("Failed to update supervisor");
+        alert("Failed to update supervisor assignment");
+      }
+    } catch (error) {
+      console.error("Error updating supervisor:", error);
+      alert("Error updating supervisor assignment");
+    }
+  };
+
   if (loading) {
     return <Loading message="Loading supervisors..." />;
   }
@@ -59,20 +128,43 @@ export default function SupervisorsPage() {
 
         <div className="w-full">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-3xl font-bold text-zinc-900 dark:text-white">
-              Supervisors
-            </h2>
+            <div className="flex gap-4 items-baseline">
+              <h2 className="text-3xl font-bold text-zinc-900 dark:text-white">
+                Supervisors
+              </h2>
+              <span className="text-sm text-zinc-500 dark:text-zinc-400">
+                Use drag and drop to edit supervisor assignments.
+              </span>
+            </div>
             <BackButton />
           </div>
 
           {supervisors.length === 0 ? (
             <NoData message="No supervisors found" />
           ) : (
-            <div className="flex flex-row flex-wrap gap-6 ">
-              {supervisors.map((supervisor) => (
-                <SupervisorCard key={supervisor._id} supervisor={supervisor} />
-              ))}
-            </div>
+            <DndContext
+              collisionDetection={closestCenter}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+            >
+              <div className="flex flex-row flex-wrap gap-6 ">
+                {supervisors.map((supervisor) => (
+                  <SupervisorCard
+                    key={supervisor._id}
+                    supervisor={supervisor}
+                  />
+                ))}
+              </div>
+              <DragOverlay>
+                {activeId ? (
+                  <div className="bg-blue-600 text-white p-3 rounded-md shadow-lg opacity-90">
+                    {supervisors
+                      .flatMap((s) => s.assignees)
+                      .find((a) => a._id === activeId)?.name || "Dragging..."}
+                  </div>
+                ) : null}
+              </DragOverlay>
+            </DndContext>
           )}
         </div>
       </div>

@@ -57,7 +57,7 @@ export async function PATCH(
     const db = client.db("dw-team-manager");
     const body = await request.json();
 
-    const { location, name, rank, level, kills, cp } = body;
+    const { location, name, rank, level, kills, cp, supervisedBy } = body;
 
     let updateOperator: Record<string, unknown> = { $set: {} };
 
@@ -85,6 +85,14 @@ export async function PATCH(
     }
     if (cp !== undefined) {
       (updateOperator.$set as Record<string, unknown>).cp = Number(cp);
+    }
+    if (supervisedBy !== undefined) {
+      if (supervisedBy === null) {
+        updateOperator.$unset = { supervisedBy: "" };
+      } else {
+        (updateOperator.$set as Record<string, unknown>).supervisedBy =
+          new ObjectId(supervisedBy as string);
+      }
     }
 
     const result = await db
