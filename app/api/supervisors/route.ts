@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
+import { Member } from "@/app/services/types";
 
 export async function GET() {
   try {
@@ -19,7 +20,7 @@ export async function GET() {
       .toArray();
 
     // Group supervised members by supervisor ID
-    const supervisorMap = new Map<string, any[]>();
+    const supervisorMap = new Map<string, Member[]>();
 
     supervisedMembers.forEach((member) => {
       const supervisorId =

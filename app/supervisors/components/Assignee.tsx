@@ -2,7 +2,6 @@ import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { formatNumberShort } from "@/app/services/numbers";
 import { Member } from "@/app/services/types";
-import Link from "next/link";
 
 type Props = {
   assignee: Member;
