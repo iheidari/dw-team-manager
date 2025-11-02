@@ -1,5 +1,4 @@
 import SelectField from "@/app/member/[id]/components/SelectField";
-import React from "react";
 import { HeatMap } from "../service";
 
 interface Props {

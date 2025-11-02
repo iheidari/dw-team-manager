@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Header from "@/app/components/Header";
-import BackButton from "./[id]/components/BackButton";
+import Header from "@/app/ui/Header";
+import BackButton from "@/app/ui/BackButton";
 import Field from "./[id]/components/Field";
 import SelectField from "./[id]/components/SelectField";
 import { LEVEL_OPTIONS, RANK_OPTIONS } from "./util";

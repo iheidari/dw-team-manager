@@ -9,6 +9,10 @@ const menuItems = [
     label: "Formation",
     href: "/formation",
   },
+  {
+    label: "Supervisors",
+    href: "/supervisors",
+  },
 
   // {
   //   label: "Upload",

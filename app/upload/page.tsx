@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
-import Header from "../components/Header";
-import TypeSelector from "./components/TypeSelector";
-import FilesUploader from "./components/FilesUploader";
+import Header from "@/app/ui/Header";
+import TypeSelector from "@/app/upload/components/TypeSelector";
+import FilesUploader from "@/app/upload/components/FilesUploader";
 
 export default function Upload() {
   const [selectedType, setSelectedType] = useState("");

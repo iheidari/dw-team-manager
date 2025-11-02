@@ -1,5 +1,5 @@
-import Header from "./components/Header";
-import MemberTable from "./components/MemberTable";
+import Header from "./ui/Header";
+import MemberTable from "./ui/MemberTable";
 
 export default function Home() {
   return (

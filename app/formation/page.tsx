@@ -12,9 +12,9 @@ import {
 } from "@dnd-kit/core";
 import type { DragStartEvent } from "@dnd-kit/core";
 import { Member } from "../services/types";
-import Loading from "./components/Loading";
+import Loading from "../ui/Loading";
 import Card from "./components/Card";
-import BackButton from "../member/[id]/components/BackButton";
+import BackButton from "../ui/BackButton";
 import HeatmapSelector from "./components/HeatmapSelector";
 import { getHeatmapClass, HeatMap } from "./service";
 
@@ -204,7 +204,7 @@ export default function Formation() {
   };
 
   if (loading) {
-    return <Loading />;
+    return <Loading message="Loading formation..." />;
   }
 
   return (

@@ -1,5 +1,5 @@
-import Header from "@/app/components/Header";
-import BackButton from "./BackButton";
+import Header from "@/app/ui/Header";
+import BackButton from "@/app/ui/BackButton";
 
 const NotFound = () => {
   return (

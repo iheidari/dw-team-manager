@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Header from "@/app/components/Header";
-import BackButton from "./components/BackButton";
+import Header from "@/app/ui/Header";
+import BackButton from "@/app/ui/BackButton";
 import Field from "./components/Field";
 import SelectField from "./components/SelectField";
 import NotFound from "./components/NotFound";
