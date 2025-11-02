@@ -30,7 +30,7 @@ const SupervisorCard = (props: Props) => {
         {props.supervisor.name}
       </h3>
       {assignees.length === 0 ? (
-        <NoAssignee />
+        <NoAssignee message="No assignees" />
       ) : (
         <div className="flex flex-col gap-2">
           <div className="border-2 p-3 rounded-md">

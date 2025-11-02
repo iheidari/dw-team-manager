@@ -15,6 +15,7 @@ import Error from "../ui/Error";
 import NoData from "../ui/NoData";
 import { Member } from "../services/types";
 import SupervisorCard from "./components/SupervisorCard";
+import UnassignedCard, { UNASSIGNED_ID } from "./components/UnassignedCard";
 
 export interface Supervisor {
   _id: string;
@@ -30,9 +31,23 @@ export interface Supervisor {
 
 export default function SupervisorsPage() {
   const [supervisors, setSupervisors] = useState<Supervisor[]>([]);
+  const [unassigned, setUnassigned] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
+
+  const fetchSupervisors = async () => {
+    try {
+      const response = await fetch("/api/supervisors");
+      const data = await response.json();
+      if (data.success) {
+        setSupervisors(data.data);
+        setUnassigned(data.unassigned || []);
+      }
+    } catch (error) {
+      console.error("Error fetching supervisors:", error);
+    }
+  };
 
   useEffect(() => {
     fetch("/api/supervisors")
@@ -40,6 +55,7 @@ export default function SupervisorsPage() {
       .then((data) => {
         if (data.success) {
           setSupervisors(data.data);
+          setUnassigned(data.unassigned || []);
         } else {
           setError(data.error || "Failed to load supervisors");
         }
@@ -51,18 +67,6 @@ export default function SupervisorsPage() {
         setLoading(false);
       });
   }, []);
-
-  const fetchSupervisors = async () => {
-    try {
-      const response = await fetch("/api/supervisors");
-      const data = await response.json();
-      if (data.success) {
-        setSupervisors(data.data);
-      }
-    } catch (error) {
-      console.error("Error fetching supervisors:", error);
-    }
-  };
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
@@ -77,15 +81,50 @@ export default function SupervisorsPage() {
     }
 
     const assigneeId = active.id as string;
-    const targetSupervisorId = over.id as string;
+    const targetId = over.id as string;
 
-    // Find the current supervisor
+    // Find the current supervisor (if assigned)
     const currentSupervisor = supervisors.find((s) =>
       s.assignees.some((a) => a._id === assigneeId)
     );
 
+    // Check if it's already unassigned
+    const isCurrentlyUnassigned = unassigned.some((a) => a._id === assigneeId);
+
+    // Handle dropping on unassigned zone (remove assignment)
+    if (targetId === UNASSIGNED_ID) {
+      if (isCurrentlyUnassigned) {
+        // Already unassigned, do nothing
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/members/${assigneeId}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            supervisedBy: null,
+          }),
+        });
+
+        if (response.ok) {
+          await fetchSupervisors();
+        } else {
+          console.error("Failed to remove supervisor assignment");
+          alert("Failed to remove supervisor assignment");
+        }
+      } catch (error) {
+        console.error("Error removing supervisor assignment:", error);
+        alert("Error removing supervisor assignment");
+      }
+      return;
+    }
+
+    // Handle dropping on a supervisor (assign or reassign)
     // Don't do anything if dropping on the same supervisor
-    if (currentSupervisor?._id === targetSupervisorId) {
+    if (currentSupervisor?._id === targetId) {
       return;
     }
 
@@ -96,7 +135,7 @@ export default function SupervisorsPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          supervisedBy: targetSupervisorId,
+          supervisedBy: targetId,
         }),
       });
 
@@ -154,13 +193,18 @@ export default function SupervisorsPage() {
                     supervisor={supervisor}
                   />
                 ))}
+                {unassigned.length > 0 && (
+                  <UnassignedCard unassigned={unassigned} />
+                )}
               </div>
               <DragOverlay>
                 {activeId ? (
                   <div className="bg-blue-600 text-white p-3 rounded-md shadow-lg opacity-90">
                     {supervisors
                       .flatMap((s) => s.assignees)
-                      .find((a) => a._id === activeId)?.name || "Dragging..."}
+                      .find((a) => a._id === activeId)?.name ||
+                      unassigned.find((a) => a._id === activeId)?.name ||
+                      "Dragging..."}
                   </div>
                 ) : null}
               </DragOverlay>

@@ -59,7 +59,29 @@ export async function GET() {
       };
     });
 
-    return NextResponse.json({ success: true, data: result });
+    // Get unassigned members (not R4 or R5, and no supervisor)
+    const unassignedMembers = await db
+      .collection("members")
+      .find({
+        rank: { $nin: ["R4", "R5"] },
+        $or: [{ supervisedBy: { $exists: false } }, { supervisedBy: null }],
+      })
+      .toArray();
+
+    const unassigned = unassignedMembers.map((member) => ({
+      _id: member._id.toString(),
+      name: member.name,
+      rank: member.rank,
+      level: member.level,
+      kills: member.kills || 0,
+      cp: member.cp || 0,
+    }));
+
+    return NextResponse.json({
+      success: true,
+      data: result,
+      unassigned,
+    });
   } catch (error) {
     console.error("Error fetching supervisors:", error);
     return NextResponse.json(
