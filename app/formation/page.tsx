@@ -17,8 +17,10 @@ import Card from "./components/Card";
 import BackButton from "../ui/BackButton";
 import HeatmapSelector from "./components/HeatmapSelector";
 import { getHeatmapClass, HeatMap } from "./service";
+import { useRouter } from "next/navigation";
 
 export default function Formation() {
+  const router = useRouter();
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [gridConfig, setGridConfig] = useState({ rows: 1, cols: 1 });
@@ -211,7 +213,15 @@ export default function Formation() {
     <>
       <div className="flex w-full  justify-between items-center pt-8 px-8 bg-white dark:bg-black sm:items-start">
         <BackButton />
-        <HeatmapSelector value={heatmap} onChange={handleHeatmapChange} />
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => router.push("/formation/print")}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+          >
+            Print
+          </button>
+          <HeatmapSelector value={heatmap} onChange={handleHeatmapChange} />
+        </div>
       </div>
       <DndContext
         sensors={sensors}
