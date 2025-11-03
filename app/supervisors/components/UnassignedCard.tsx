@@ -2,7 +2,6 @@ import { useDroppable } from "@dnd-kit/core";
 import Assignee from "./Assignee";
 import { Member } from "@/app/services/types";
 import { formatNumberShort } from "@/app/services/numbers";
-import NoAssignee from "./NoAssignee";
 
 type Props = {
   unassigned: Member[];

@@ -67,7 +67,7 @@ export async function POST(request: Request) {
     const body = await request.json();
 
     // Validate required fields
-    const { name, rank, level, kills, cp } = body;
+    const { name, rank, level, kills, cp, notes } = body;
     if (!name || !rank || !level) {
       return NextResponse.json(
         { success: false, error: "Missing required fields" },
@@ -81,6 +81,7 @@ export async function POST(request: Request) {
       level,
       kills: kills ? Number(kills) : 0,
       cp: cp ? Number(cp) : 0,
+      notes: notes || "",
     });
 
     return NextResponse.json(

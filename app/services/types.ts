@@ -5,6 +5,7 @@ export interface Member {
   level: string;
   kills: number;
   cp: number;
+  notes?: string;
   location?: {
     row: number;
     col: number;

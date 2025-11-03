@@ -6,6 +6,7 @@ import Header from "@/app/ui/Header";
 import BackButton from "@/app/ui/BackButton";
 import Field from "./[id]/components/Field";
 import SelectField from "./[id]/components/SelectField";
+import TextAreaField from "./[id]/components/TextAreaField";
 import { LEVEL_OPTIONS, RANK_OPTIONS } from "./util";
 
 export default function NewMemberPage() {
@@ -16,6 +17,7 @@ export default function NewMemberPage() {
     level: "Ind1",
     kills: "",
     cp: "",
+    notes: "",
   });
   const router = useRouter();
 
@@ -48,6 +50,7 @@ export default function NewMemberPage() {
           level: formData.level,
           kills: Number(formData.kills) || 0,
           cp: Number(formData.cp) || 0,
+          notes: formData.notes || "",
         }),
       });
 
@@ -123,6 +126,16 @@ export default function NewMemberPage() {
                     onChange={(value) => handleChange("cp", value)}
                   />
                 </div>
+              </div>
+
+              <div className="mt-6">
+                <TextAreaField
+                  label="Notes"
+                  name="notes"
+                  value={formData.notes}
+                  onChange={(value) => handleChange("notes", value)}
+                  rows={5}
+                />
               </div>
 
               <div className="mt-6 flex justify-end">

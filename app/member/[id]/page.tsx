@@ -6,6 +6,7 @@ import Header from "@/app/ui/Header";
 import BackButton from "@/app/ui/BackButton";
 import Field from "./components/Field";
 import SelectField from "./components/SelectField";
+import TextAreaField from "./components/TextAreaField";
 import ReadOnlyField from "./components/ReadOnlyField";
 import NotFound from "./components/NotFound";
 import { LEVEL_OPTIONS, RANK_OPTIONS } from "../util";
@@ -18,6 +19,7 @@ interface Member {
   level: string;
   kills: number;
   cp: number;
+  notes?: string;
   location?: {
     row: number;
     col: number;
@@ -41,6 +43,7 @@ export default function MemberDetailPage({
     level: "",
     kills: "",
     cp: "",
+    notes: "",
   });
   const router = useRouter();
 
@@ -62,6 +65,7 @@ export default function MemberDetailPage({
           level: memberData.level,
           kills: memberData.kills,
           cp: memberData.cp,
+          notes: memberData.notes || "",
         });
       } catch (error) {
         console.error("Error fetching member:", error);
@@ -98,6 +102,7 @@ export default function MemberDetailPage({
           level: formData.level,
           kills: Number(formData.kills),
           cp: Number(formData.cp),
+          notes: formData.notes || "",
         }),
       });
 
@@ -238,6 +243,16 @@ export default function MemberDetailPage({
                     }
                   />
                 </div>
+              </div>
+
+              <div className="mt-6">
+                <TextAreaField
+                  label="Notes"
+                  name="notes"
+                  value={formData.notes}
+                  onChange={(value) => handleChange("notes", value)}
+                  rows={5}
+                />
               </div>
 
               <div className="mt-6 flex justify-between">
