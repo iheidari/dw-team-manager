@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Header from "@/app/ui/Header";
 import BackButton from "@/app/ui/BackButton";
 import Field from "./components/Field";
@@ -46,6 +46,7 @@ export default function MemberDetailPage({
     notes: "",
   });
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     const fetchMember = async () => {
@@ -164,6 +165,136 @@ export default function MemberDetailPage({
       </div>
     );
   }
+  const sortMembers = (
+    members: Member[],
+    sortBy: string,
+    sortOrder: string
+  ): Member[] => {
+    const sorted = [...members].sort((a, b) => {
+      let aValue: string | number;
+      let bValue: string | number;
+
+      switch (sortBy) {
+        case "name":
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+          break;
+        case "rank":
+          aValue = a.rank;
+          bValue = b.rank;
+          break;
+        case "level":
+          aValue = a.level;
+          bValue = b.level;
+          break;
+        case "kills":
+          aValue = a.kills || 0;
+          bValue = b.kills || 0;
+          break;
+        case "cp":
+          aValue = a.cp || 0;
+          bValue = b.cp || 0;
+          break;
+        case "supervisedByName":
+          aValue = (a.supervisedByName || "").toLowerCase();
+          bValue = (b.supervisedByName || "").toLowerCase();
+          break;
+        default:
+          aValue = a.rank;
+          bValue = b.rank;
+      }
+
+      if (typeof aValue === "string" && typeof bValue === "string") {
+        const comparison = aValue.localeCompare(bValue);
+        return sortOrder === "asc" ? comparison : -comparison;
+      } else {
+        const comparison = (aValue as number) - (bValue as number);
+        return sortOrder === "asc" ? comparison : -comparison;
+      }
+    });
+
+    return sorted;
+  };
+
+  const handlePreviousClick = async () => {
+    if (!member) return;
+
+    try {
+      const sortBy = searchParams.get("sortBy") || "rank";
+      const sortOrder = searchParams.get("sortOrder") || "desc";
+
+      // Fetch all members
+      const response = await fetch("/api/members");
+      const result = await response.json();
+
+      if (!result.success || !result.data) {
+        return;
+      }
+
+      const allMembers = result.data as Member[];
+      const sortedMembers = sortMembers(allMembers, sortBy, sortOrder);
+
+      // Find current member index
+      const currentIndex = sortedMembers.findIndex((m) => m._id === member._id);
+
+      if (currentIndex === -1) {
+        return;
+      }
+
+      // Get previous member (wrap to last if at first)
+      const previousIndex =
+        currentIndex === 0 ? sortedMembers.length - 1 : currentIndex - 1;
+      const previousMember = sortedMembers[previousIndex];
+
+      // Navigate with sort params preserved
+      const params = new URLSearchParams();
+      params.set("sortBy", sortBy);
+      params.set("sortOrder", sortOrder);
+      router.push(`/member/${previousMember._id}?${params.toString()}`);
+    } catch (error) {
+      console.error("Error navigating to previous member:", error);
+    }
+  };
+
+  const handleNextClick = async () => {
+    if (!member) return;
+
+    try {
+      const sortBy = searchParams.get("sortBy") || "rank";
+      const sortOrder = searchParams.get("sortOrder") || "desc";
+
+      // Fetch all members
+      const response = await fetch("/api/members");
+      const result = await response.json();
+
+      if (!result.success || !result.data) {
+        return;
+      }
+
+      const allMembers = result.data as Member[];
+      const sortedMembers = sortMembers(allMembers, sortBy, sortOrder);
+
+      // Find current member index
+      const currentIndex = sortedMembers.findIndex((m) => m._id === member._id);
+
+      if (currentIndex === -1) {
+        return;
+      }
+
+      // Get next member (wrap to first if at last)
+      const nextIndex =
+        currentIndex === sortedMembers.length - 1 ? 0 : currentIndex + 1;
+      const nextMember = sortedMembers[nextIndex];
+
+      // Navigate with sort params preserved
+      const params = new URLSearchParams();
+      params.set("sortBy", sortBy);
+      params.set("sortOrder", sortOrder);
+      router.push(`/member/${nextMember._id}?${params.toString()}`);
+    } catch (error) {
+      console.error("Error navigating to next member:", error);
+    }
+  };
 
   if (!member) {
     return <NotFound />;
@@ -175,7 +306,7 @@ export default function MemberDetailPage({
         <Header />
 
         <div className="w-full">
-          <BackButton />
+          <BackButton goHome={true} />
 
           <form onSubmit={handleSubmit}>
             <div className="bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800 rounded-lg shadow-lg p-8">
@@ -183,6 +314,22 @@ export default function MemberDetailPage({
                 <h2 className="text-3xl font-bold text-zinc-900 dark:text-white">
                   Edit Member
                 </h2>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={handlePreviousClick}
+                    className="px-3 py-2 bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-white rounded-md hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors"
+                  >
+                    &lt;
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleNextClick}
+                    className="px-3 py-2 bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-white rounded-md hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors"
+                  >
+                    &gt;
+                  </button>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

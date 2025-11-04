@@ -225,7 +225,15 @@ const MemberTable = () => {
   const onRowClicked = (event: RowClickedEvent<RowData>) => {
     if (event.data) {
       const memberId = event.data._id;
-      router.push(`/member/${memberId}`);
+      const sortBy = searchParams.get("sortBy");
+      const sortOrder = searchParams.get("sortOrder");
+      const params = new URLSearchParams();
+      if (sortBy && sortOrder) {
+        params.set("sortBy", sortBy);
+        params.set("sortOrder", sortOrder);
+      }
+      const queryString = params.toString();
+      router.push(`/member/${memberId}${queryString ? `?${queryString}` : ""}`);
     }
   };
 
