@@ -8,6 +8,8 @@ import BackButton from "../../ui/BackButton";
 export default function FormationPrint() {
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
+  const [xCoordinate, setXCoordinate] = useState<string>("519");
+  const [yCoordinate, setYCoordinate] = useState<string>("444");
 
   useEffect(() => {
     fetch("/api/members")
@@ -16,6 +18,24 @@ export default function FormationPrint() {
         if (data.success) {
           const membersData = data.data as Member[];
           setMembers(membersData);
+
+          // Find top-left member (member with minimum row and col)
+          const positionedMembers = membersData.filter((m) => m.location);
+          if (positionedMembers.length > 0) {
+            const minRow = Math.min(
+              ...positionedMembers.map((m) => m.location!.row)
+            );
+            const minCol = Math.min(
+              ...positionedMembers.map((m) => m.location!.col)
+            );
+            const topLeftMember = positionedMembers.find(
+              (m) => m.location?.row === minRow && m.location?.col === minCol
+            );
+            if (topLeftMember?.location) {
+              setXCoordinate(topLeftMember.location.col.toString());
+              setYCoordinate(topLeftMember.location.row.toString());
+            }
+          }
         }
         setLoading(false);
       })
@@ -50,6 +70,15 @@ export default function FormationPrint() {
   ): Member | undefined => {
     const key = `${row}-${col}`;
     return positionMap.get(key);
+  };
+
+  // Helper function to calculate coordinates
+  const calculateCoordinates = (row: number, col: number): string => {
+    const xBase = parseFloat(xCoordinate) || 0;
+    const yBase = parseFloat(yCoordinate) || 0;
+    const x = xBase + col * 3;
+    const y = yBase - row * 3;
+    return `${x},${y}`;
   };
 
   return (
@@ -92,9 +121,31 @@ export default function FormationPrint() {
           </div>
 
           <div className="w-full">
-            <h1 className="text-3xl font-bold mb-6 text-zinc-900 dark:text-white print:text-lg print:mb-3">
-              Formation View
-            </h1>
+            <div className="flex items-center gap-4 mb-6 print:mb-3">
+              <h1 className="text-3xl font-bold text-zinc-900 dark:text-white print:text-lg">
+                Formation View
+              </h1>
+              <div className="flex items-center gap-2 no-print">
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  X:
+                </label>
+                <input
+                  type="text"
+                  value={xCoordinate}
+                  onChange={(e) => setXCoordinate(e.target.value)}
+                  className="w-20 px-2 py-1 border border-zinc-300 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  Y:
+                </label>
+                <input
+                  type="text"
+                  value={yCoordinate}
+                  onChange={(e) => setYCoordinate(e.target.value)}
+                  className="w-20 px-2 py-1 border border-zinc-300 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
 
             {positionedMembers.length === 0 ? (
               <p className="text-zinc-600 dark:text-zinc-400">
@@ -127,12 +178,25 @@ export default function FormationPrint() {
                             rowIndex,
                             colIndex
                           );
+                          const coordinates = calculateCoordinates(
+                            rowIndex,
+                            colIndex
+                          );
                           return (
                             <td
                               key={colIndex}
                               className="border border-zinc-300 dark:border-zinc-700 px-4 py-3 text-center text-zinc-900 dark:text-white min-w-[120px] print:px-2 print:py-1 print:text-xs print:min-w-0"
                             >
-                              {member ? member.name : "—"}
+                              {member ? (
+                                <div className="flex flex-col">
+                                  <span>{member.name}</span>
+                                  <span className="text-xs text-zinc-500 dark:text-zinc-400 print:text-[8px]">
+                                    {coordinates}
+                                  </span>
+                                </div>
+                              ) : (
+                                "—"
+                              )}
                             </td>
                           );
                         })}
