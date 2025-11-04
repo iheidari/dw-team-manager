@@ -9,7 +9,7 @@ import {
 } from "ag-grid-community";
 import { columnDefs, RowData } from "./types";
 import { useEffect, useState, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Link from "next/link";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -18,18 +18,14 @@ const STORAGE_KEY = "member-table-state";
 
 const MemberTable = () => {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [rowData, setRowData] = useState<RowData[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
   const gridRef = useRef<AgGridReact>(null);
-  const sortModelRef = useRef<
-    Array<{
-      colId: string;
-      sort: string | null | undefined;
-      sortIndex?: number | null | undefined;
-    }>
-  >([]);
   const filterModelRef = useRef<Record<string, unknown>>({});
+  const isGridReady = useRef(false);
 
   useEffect(() => {
     fetch("/api/members")
@@ -46,13 +42,36 @@ const MemberTable = () => {
       });
   }, []);
 
+  const updateSortInUrl = (
+    sortModel: Array<{
+      colId: string;
+      sort: string | null | undefined;
+      sortIndex?: number | null | undefined;
+    }>
+  ) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    // Remove existing sort params
+    params.delete("sortBy");
+    params.delete("sortOrder");
+
+    if (sortModel.length > 0) {
+      const primarySort = sortModel[0];
+      if (primarySort.sort) {
+        params.set("sortBy", primarySort.colId);
+        params.set("sortOrder", primarySort.sort);
+      }
+    }
+
+    router.replace(`${pathname}?${params.toString()}`);
+  };
+
   const saveState = () => {
     if (gridRef.current?.api) {
       const columnState = gridRef.current.api.getColumnState();
 
       const state = {
         columnState,
-        sortState: sortModelRef.current,
         filterState: filterModelRef.current,
       };
 
@@ -68,12 +87,13 @@ const MemberTable = () => {
     if (gridRef.current?.api) {
       const sortModel = gridRef.current.api
         .getColumnState()
-        .filter((col) => col.sort);
-      sortModelRef.current = sortModel.map((col) => ({
-        colId: col.colId,
-        sort: col.sort,
-        sortIndex: col.sortIndex,
-      }));
+        .filter((col) => col.sort)
+        .map((col) => ({
+          colId: col.colId,
+          sort: col.sort,
+          sortIndex: col.sortIndex,
+        }));
+      updateSortInUrl(sortModel);
       saveState();
     }
   };
@@ -88,13 +108,24 @@ const MemberTable = () => {
   const loadState = () => {
     if (gridRef.current?.api) {
       try {
+        // Load column state and filters from localStorage
         const savedState = localStorage.getItem(STORAGE_KEY);
         if (savedState) {
           const state = JSON.parse(savedState);
           if (state.columnState) {
-            // Restore column state which includes order, width, and sort
+            // Restore column state (order and width) but not sort
+            const columnStateWithoutSort = state.columnState.map(
+              (col: {
+                colId: string;
+                sort?: string | null;
+                [key: string]: unknown;
+              }) => ({
+                ...col,
+                sort: undefined,
+              })
+            );
             gridRef.current.api.applyColumnState({
-              state: state.columnState,
+              state: columnStateWithoutSort,
               applyOrder: true,
             });
           }
@@ -102,15 +133,94 @@ const MemberTable = () => {
             gridRef.current.api.setFilterModel(state.filterState);
           }
         }
+
+        // Apply sort from URL query parameters or use default
+        const sortBy = searchParams.get("sortBy");
+        const sortOrder = searchParams.get("sortOrder");
+
+        if (sortBy && sortOrder) {
+          // Apply sort from URL
+          gridRef.current.api.applyColumnState({
+            state: [
+              {
+                colId: sortBy,
+                sort: sortOrder as "asc" | "desc",
+              },
+            ],
+            defaultState: { sort: null },
+          });
+        } else {
+          // Apply default sort: Desc on rank
+          gridRef.current.api.applyColumnState({
+            state: [
+              {
+                colId: "rank",
+                sort: "desc",
+              },
+            ],
+            defaultState: { sort: null },
+          });
+          // Update URL with default sort
+          const params = new URLSearchParams(searchParams.toString());
+          params.set("sortBy", "rank");
+          params.set("sortOrder", "desc");
+          router.replace(`${pathname}?${params.toString()}`);
+        }
       } catch (error) {
-        console.error("Error loading from localStorage:", error);
+        console.error("Error loading state:", error);
       }
     }
   };
 
   const onGridReady = () => {
+    isGridReady.current = true;
     loadState();
   };
+
+  // Sync grid sort when URL params change (e.g., browser back/forward)
+  useEffect(() => {
+    if (isGridReady.current && gridRef.current?.api) {
+      const sortBy = searchParams.get("sortBy");
+      const sortOrder = searchParams.get("sortOrder");
+
+      const currentSort = gridRef.current.api
+        .getColumnState()
+        .find((col) => col.sort);
+
+      // Only update if URL params differ from current grid state
+      if (sortBy && sortOrder) {
+        if (currentSort?.colId !== sortBy || currentSort?.sort !== sortOrder) {
+          gridRef.current.api.applyColumnState({
+            state: [
+              {
+                colId: sortBy,
+                sort: sortOrder as "asc" | "desc",
+              },
+            ],
+            defaultState: { sort: null },
+          });
+        }
+      } else if (!sortBy && !sortOrder) {
+        // If no sort params, apply default
+        if (currentSort?.colId !== "rank" || currentSort?.sort !== "desc") {
+          gridRef.current.api.applyColumnState({
+            state: [
+              {
+                colId: "rank",
+                sort: "desc",
+              },
+            ],
+            defaultState: { sort: null },
+          });
+          // Update URL with default sort
+          const params = new URLSearchParams(searchParams.toString());
+          params.set("sortBy", "rank");
+          params.set("sortOrder", "desc");
+          router.replace(`${pathname}?${params.toString()}`);
+        }
+      }
+    }
+  }, [searchParams, pathname, router]);
 
   const onRowClicked = (event: RowClickedEvent<RowData>) => {
     if (event.data) {
