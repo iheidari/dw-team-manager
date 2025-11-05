@@ -257,22 +257,20 @@ export default function Formation() {
               </div>
             </div>
 
-            {members.filter((m) => !m.location).length > 0 && (
-              <div className="mt-8">
-                <Card isUnpositionedArea />
-                <div className="flex flex-wrap gap-2 mt-4">
-                  {members
-                    .filter((m) => !m.location)
-                    .map((member) => (
-                      <Card
-                        key={member._id}
-                        member={member}
-                        className={getHeatmapClass(heatmap, member, members)}
-                      />
-                    ))}
-                </div>
+            <div className="mt-8">
+              <Card isUnpositionedArea />
+              <div className="flex flex-wrap gap-2 mt-4">
+                {members
+                  .filter((m) => !m.location)
+                  .map((member) => (
+                    <Card
+                      key={member._id}
+                      member={member}
+                      className={getHeatmapClass(heatmap, member, members)}
+                    />
+                  ))}
               </div>
-            )}
+            </div>
           </div>
         </main>
         <DragOverlay>
