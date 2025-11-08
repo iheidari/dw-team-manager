@@ -290,28 +290,33 @@ const MemberTable = () => {
           </Link>
         </div>
       </div>
-      <div className="ag-theme-quartz w-full" style={{ height: "500px" }}>
-        <AgGridReact<RowData>
-          ref={gridRef}
-          theme="legacy"
-          columnDefs={columnDefs}
-          rowData={rowData}
-          defaultColDef={{
-            flex: 1,
-            sortable: true,
-            filter: true,
-            resizable: true,
-          }}
-          enableCellTextSelection={true}
-          suppressCellFocus={false}
-          onRowClicked={onRowClicked}
-          onGridReady={onGridReady}
-          onColumnMoved={saveState}
-          onColumnResized={saveState}
-          onSortChanged={onSortChanged}
-          onFilterChanged={onFilterChanged}
-          className="cursor-pointer"
-        />
+      <div className="w-full overflow-x-auto">
+        <div
+          className="ag-theme-quartz"
+          style={{ height: "500px", minWidth: "850px" }}
+        >
+          <AgGridReact<RowData>
+            ref={gridRef}
+            theme="legacy"
+            columnDefs={columnDefs}
+            rowData={rowData}
+            defaultColDef={{
+              flex: 1,
+              sortable: true,
+              filter: true,
+              resizable: true,
+            }}
+            enableCellTextSelection={true}
+            suppressCellFocus={false}
+            onRowClicked={onRowClicked}
+            onGridReady={onGridReady}
+            onColumnMoved={saveState}
+            onColumnResized={saveState}
+            onSortChanged={onSortChanged}
+            onFilterChanged={onFilterChanged}
+            className="cursor-pointer"
+          />
+        </div>
       </div>
     </div>
   );
