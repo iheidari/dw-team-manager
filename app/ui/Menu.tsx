@@ -14,10 +14,10 @@ const menuItems = [
     href: "/supervisors",
   },
 
-  // {
-  //   label: "Upload",
-  //   href: "/upload",
-  // },
+  {
+    label: "Tools",
+    href: "/tools",
+  },
 ];
 
 const Menu = () => {
