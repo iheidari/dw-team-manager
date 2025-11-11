@@ -21,12 +21,19 @@ export default function MergedImages({ images }: MergedImagesProps) {
             <p className="text-sm font-medium mb-2 text-zinc-700 dark:text-zinc-300">
               Image {index + 1}
             </p>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={`data:image/png;base64,${imageBase64}`}
-              alt={`Merged image ${index + 1}`}
-              className="max-w-full max-h-[400px] h-auto rounded-lg shadow-md object-contain"
-            />
+            <a
+              href={`data:image/png;base64,${imageBase64}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block cursor-pointer"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={`data:image/png;base64,${imageBase64}`}
+                alt={`Merged image ${index + 1}`}
+                className="max-w-full max-h-[400px] h-auto rounded-lg shadow-md object-contain hover:opacity-90 transition-opacity"
+              />
+            </a>
             <div className="mt-2">
               <a
                 href={`data:image/png;base64,${imageBase64}`}
