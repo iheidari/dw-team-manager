@@ -1,11 +1,65 @@
 import { NextRequest, NextResponse } from "next/server";
 import sharp from "sharp";
 
+interface CropOptions {
+  top?: number;
+  bottom?: number;
+  left?: number;
+  right?: number;
+}
+
+async function applyCrop(buffer: Buffer, crop: CropOptions): Promise<Buffer> {
+  const image = sharp(buffer);
+  const metadata = await image.metadata();
+  const width = metadata.width || 0;
+  const height = metadata.height || 0;
+
+  const left = crop.left || 0;
+  const top = crop.top || 0;
+  const right = crop.right || 0;
+  const bottom = crop.bottom || 0;
+
+  // Calculate crop dimensions
+  const cropLeft = left;
+  const cropTop = top;
+  const cropWidth = width - left - right;
+  const cropHeight = height - top - bottom;
+
+  // Validate crop dimensions
+  if (cropWidth <= 0 || cropHeight <= 0) {
+    throw new Error(
+      `Invalid crop dimensions: resulting image would have width ${cropWidth} and height ${cropHeight}`
+    );
+  }
+
+  if (
+    cropLeft < 0 ||
+    cropTop < 0 ||
+    cropLeft + cropWidth > width ||
+    cropTop + cropHeight > height
+  ) {
+    throw new Error(
+      `Crop area exceeds image dimensions: image is ${width}x${height}, crop area is ${cropLeft},${cropTop} ${cropWidth}x${cropHeight}`
+    );
+  }
+
+  // Apply crop using extract
+  return image
+    .extract({
+      left: cropLeft,
+      top: cropTop,
+      width: cropWidth,
+      height: cropHeight,
+    })
+    .toBuffer();
+}
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const files = formData.getAll("files") as File[];
     const numberStr = formData.get("number") as string;
+    const cropStr = formData.get("crop") as string | null;
 
     // Validate inputs
     if (!files || files.length === 0) {
@@ -40,6 +94,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Parse optional crop parameter
+    let crop: CropOptions | null = null;
+    if (cropStr) {
+      try {
+        crop = JSON.parse(cropStr) as CropOptions;
+        // Validate crop values are non-negative numbers if provided
+        if (
+          (crop.top !== undefined && (isNaN(crop.top) || crop.top < 0)) ||
+          (crop.bottom !== undefined &&
+            (isNaN(crop.bottom) || crop.bottom < 0)) ||
+          (crop.left !== undefined && (isNaN(crop.left) || crop.left < 0)) ||
+          (crop.right !== undefined && (isNaN(crop.right) || crop.right < 0))
+        ) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: "Crop values must be non-negative numbers",
+            },
+            { status: 400 }
+          );
+        }
+      } catch {
+        return NextResponse.json(
+          { success: false, error: "Invalid crop parameter format" },
+          { status: 400 }
+        );
+      }
+    }
+
     // Calculate how many images per batch
     const totalImages = files.length;
     const imagesPerBatch = Math.ceil(totalImages / number);
@@ -58,11 +141,18 @@ export async function POST(request: NextRequest) {
       // Get images for this batch
       const batchFiles = files.slice(startIdx, endIdx);
 
-      // Load all images in the batch
+      // Load all images in the batch and apply cropping if specified
       const imageBuffers = await Promise.all(
         batchFiles.map(async (file) => {
           const arrayBuffer = await file.arrayBuffer();
-          return Buffer.from(arrayBuffer);
+          let buffer: Buffer = Buffer.from(arrayBuffer);
+
+          // Apply crop if provided
+          if (crop) {
+            buffer = await applyCrop(buffer, crop);
+          }
+
+          return buffer;
         })
       );
 
